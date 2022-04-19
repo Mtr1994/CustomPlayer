@@ -33,7 +33,7 @@ public:
 
     void seek(int64_t seconds);
 
-    void setVolume(double volume);
+    void setVolume(float volume);
 
     void previous();
 

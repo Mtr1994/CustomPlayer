@@ -36,7 +36,7 @@ void CustomPlayer::init()
     mMediaPlayer->setVideoSink(mVideoSink);
 
     mAudioOutput = new QAudioOutput(this);
-    mAudioOutput->setVolume(0.36);
+    mAudioOutput->setVolume((float)0.36);
     mMediaPlayer->setAudioOutput(mAudioOutput);
 }
 
@@ -69,7 +69,7 @@ void CustomPlayer::seek(int64_t seconds)
      mMediaPlayer->setPosition(seconds * 1000);
 }
 
-void CustomPlayer::setVolume(double volume)
+void CustomPlayer::setVolume(float volume)
 {
     mAudioOutput->setVolume(volume);
 }
