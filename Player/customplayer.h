@@ -1,58 +1,20 @@
 ﻿#ifndef CUSTOMPLAYER_H
 #define CUSTOMPLAYER_H
 
-#include <QWidget>
-#include <QAbstractVideoSurface>
-#include <QVideoSurfaceFormat>
-#include <QList>
-#include <QVideoFrame>
-#include <QAbstractVideoBuffer>
 #include <QOpenGLWidget>
+#include <QVideoFrame>
 #include <QImage>
 #include <QPaintEvent>
+#include <QOpenGLFunctions>
+#include <QWidget>
 
 // test
 #include <QDebug>
 
-class VideoFrameReceiver : public QAbstractVideoSurface
-{
-    Q_OBJECT
-public:
-    VideoFrameReceiver() {}
-
-    QList<QVideoFrame::PixelFormat> supportedPixelFormats(QAbstractVideoBuffer::HandleType type) const
-    {
-        if (type == QAbstractVideoBuffer::NoHandle)
-        {
-            return QList<QVideoFrame::PixelFormat>() << QVideoFrame::Format_YUV420P << QVideoFrame::Format_RGB32;
-        }
-
-        return QList<QVideoFrame::PixelFormat>();
-    };
-
-    bool start(const QVideoSurfaceFormat &format) {Q_UNUSED(format);  return true; }
-
-    void stop() {}
-
-    bool present(const QVideoFrame &frame)
-    {
-        if (frame.isValid())
-        {
-            emit sgl_play_current_frame(frame);
-        }
-        return false;
-    }
-
-signals:
-    void sgl_play_current_frame(const QVideoFrame &frame);
-};
-
 class QMediaPlayer;
-class QVideoProbe;
-class QAudioProbe;
-class QVideoWidget;
-class QMediaPlaylist;
-class CustomPlayer : public QWidget
+class QVideoSink;
+class QAudioOutput;
+class CustomPlayer : public QOpenGLWidget
 {
     Q_OBJECT
 public:
@@ -71,7 +33,7 @@ public:
 
     void seek(int64_t seconds);
 
-    void setVolume(float volume);
+    void setVolume(double volume);
 
     void previous();
 
@@ -94,23 +56,17 @@ private:
 
 private:
     QMediaPlayer *mMediaPlayer = nullptr;
-    QMediaPlaylist *mPlayList = nullptr;
-    QVideoWidget *mVideoWidget = nullptr;
-
-    QVideoProbe *mVideoProbe = nullptr;
-    QAudioProbe *mAudioProbe = nullptr;
 
     uint32_t mJumpSteps = 5000;
 
-    VideoFrameReceiver *mVideoFrameReceiver = nullptr;;
+    QVideoSink *mVideoSink = nullptr;;
+    QAudioOutput *mAudioOutput = nullptr;
 
     // 当前视频帧
     QImage mCurrentImage;
 
     int mVideoWidth;
     int mVideoHeight;
-
-    double mVideoSpeed = 1.0;
 };
 
 #endif // CUSTOMPLAYER_H

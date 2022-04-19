@@ -2,8 +2,6 @@
 #include "ui_widgetmediacontrol.h"
 #include "widgetpopupmenu.h"
 
-#include <QtMath>
-
 //test
 #include <QDebug>
 
@@ -30,6 +28,9 @@ void WidgetMediaControl::init()
     connect(ui->btnSpeed, &QPushButton::clicked, this, &WidgetMediaControl::slot_button_speed_clicked);
 
     connect(ui->slider, &QSlider::sliderMoved, this, &WidgetMediaControl::slot_duration_slider_moved);
+    connect(ui->slider, &QSlider::sliderPressed, this, [this]{ mSliderPressed = true; });
+    connect(ui->slider, &QSlider::sliderReleased, this, [this]{ mSliderPressed = false; });
+
     connect(ui->sliderVolume, &QSlider::sliderMoved, this, &WidgetMediaControl::sgl_video_volume_changed);
     ui->sliderVolume->setMaximum(100);
     ui->sliderVolume->setValue(36);
@@ -52,6 +53,8 @@ void WidgetMediaControl::slot_video_duration_changed(int64_t duration)
 
 void WidgetMediaControl::slot_video_position_change(double process)
 {
+    if (mSliderPressed) return;
+
     ui->slider->setValue(process);
 
     // 更新时间

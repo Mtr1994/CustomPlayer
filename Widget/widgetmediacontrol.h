@@ -55,6 +55,8 @@ private:
     uint64_t mVideoDuration = 0;
 
     double mCurrentSpeed = 1;
+
+    bool mSliderPressed = false;
 };
 
 #endif // WIDGETMEDIACONTROL_H

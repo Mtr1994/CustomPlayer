@@ -2,53 +2,47 @@
 
 #include <QMediaPlayer>
 #include <QVideoWidget>
-#include <QVideoProbe>
-#include <QAudioProbe>
-#include <QMediaPlaylist>
 #include <QGridLayout>
 #include <QImage>
 #include <QPainter>
+#include <QVideoSink>
+#include <QAudioSink>
+#include <QAudioOutput>
 
 // test
 #include <QDebug>
 
 CustomPlayer::CustomPlayer(QWidget *parent) :
-    QWidget(parent)
+    QOpenGLWidget(parent)
 {
     init();
 }
 
 CustomPlayer::~CustomPlayer()
 {
-    disconnect(mVideoFrameReceiver, &VideoFrameReceiver::sgl_play_current_frame, this, &CustomPlayer::slot_play_current_frame);
+    disconnect(mVideoSink, &QVideoSink::videoFrameChanged, this, &CustomPlayer::slot_play_current_frame);
+
+    mMediaPlayer->stop();
+    mMediaPlayer->deleteLater();
 }
 
 void CustomPlayer::init()
 {
     mMediaPlayer = new QMediaPlayer(this);
-    mMediaPlayer->setAudioRole(QAudio::VideoRole);
-    mMediaPlayer->setVolume(36);
-
-    mPlayList = new QMediaPlaylist;
-    mMediaPlayer->setPlaylist(mPlayList);
-
     connect(mMediaPlayer, &QMediaPlayer::durationChanged, this, &CustomPlayer::slot_duration_changed);
 
-    mVideoWidget = new QVideoWidget(this);
-    mVideoFrameReceiver = new VideoFrameReceiver;
-    connect(mVideoFrameReceiver, &VideoFrameReceiver::sgl_play_current_frame, this, &CustomPlayer::slot_play_current_frame);
-    mMediaPlayer->setVideoOutput(mVideoFrameReceiver);
+    mVideoSink = new QVideoSink;
+    connect(mVideoSink, &QVideoSink::videoFrameChanged, this, &CustomPlayer::slot_play_current_frame);
+    mMediaPlayer->setVideoSink(mVideoSink);
 
-    QGridLayout *layout = new QGridLayout(this);
-    layout->addWidget(mVideoWidget);
-    layout->setContentsMargins(0, 0, 0, 0);
-
-    setLayout(layout);
+    mAudioOutput = new QAudioOutput(this);
+    mAudioOutput->setVolume(0.36);
+    mMediaPlayer->setAudioOutput(mAudioOutput);
 }
 
 void CustomPlayer::play(const QString &path)
 {
-    mPlayList->addMedia(QMediaContent(path));
+    mMediaPlayer->setSource(path);
     mMediaPlayer->play();
 }
 
@@ -72,9 +66,9 @@ void CustomPlayer::seek(int64_t seconds)
      mMediaPlayer->setPosition(seconds * 1000);
 }
 
-void CustomPlayer::setVolume(float volume)
+void CustomPlayer::setVolume(double volume)
 {
-    mMediaPlayer->setVolume(volume * 100);
+    mAudioOutput->setVolume(volume);
 }
 
 void CustomPlayer::previous()
@@ -89,13 +83,12 @@ void CustomPlayer::next()
 
 void CustomPlayer::changeRate(float rate)
 {
-    mVideoSpeed = rate;
     mMediaPlayer->setPlaybackRate(rate);
 }
 
 void CustomPlayer::slot_play_current_frame(const QVideoFrame &frame)
 {
-    mCurrentImage = frame.image();
+    mCurrentImage = frame.toImage();
 
     double rate = (double)frame.height() / frame.width();
     double widthSize = this->width();
@@ -112,20 +105,24 @@ void CustomPlayer::slot_play_current_frame(const QVideoFrame &frame)
 
     update();
 
-    emit sgl_video_position_change((double)frame.startTime() / 1000.0 * mVideoSpeed);
+    emit sgl_video_position_change((double)frame.startTime() / 1000.0);
 }
 
 void CustomPlayer::paintEvent(QPaintEvent *event)
 {
     QRect backgroundRect = this->rect();
 
-    QPainter painter(this);
+    QPainter painter;
+    painter.begin(this);
+
     painter.setPen(Qt::NoPen);
-    painter.setBrush(QBrush(QColor(0, 0, 0)));
+    painter.setBrush(QBrush(QColor(1, 1, 0)));
     painter.drawRect(backgroundRect);
+
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
     QRectF imageRect = QRectF((backgroundRect.width() - mVideoWidth) * 0.5, (backgroundRect.height() - mVideoHeight) * 0.5, mVideoWidth ,mVideoHeight);
     painter.drawImage(imageRect, mCurrentImage);
+    painter.end();
 
     QWidget::paintEvent(event);
 }

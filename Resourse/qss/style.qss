@@ -398,3 +398,33 @@ QComboBox QAbstractItemView::item:selected
     color: rgb(48, 49, 51);
     background-color: #f5f7fa;
 }
+
+/* QMenu */
+QMenu
+{
+    background-color: #ffffff;
+    border:1px solid #fefefe;
+}
+
+QMenu::item
+{
+    min-width: 6em;
+    min-height: 1.6em;
+    background: #ffffff;
+    border: 1px solid transparent;
+    padding: 1px 1em;
+}
+QMenu::item:selected
+{
+    background: #f0f0f0;
+    border:1px solid transparent;
+}
+QMenu::item:!enabled
+{
+    color: #dddddd;
+}
+QMenu::item:pressed
+{
+    background: #f3f3f3;
+    border:1px solid transparent;
+}

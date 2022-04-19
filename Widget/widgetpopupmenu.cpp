@@ -85,7 +85,7 @@ void WidgetPopupMenu::setMenuList(const QStringList &list)
 void WidgetPopupMenu::showMenu()
 {
     if (nullptr == mTargetWidgetPtr) return closeMenu();
-    if (nullptr == topLevelWidget()) return closeMenu();
+    if (nullptr == nativeParentWidget()) return closeMenu();
 
     if (mGlobalMenuCount < 0)
     {
@@ -101,8 +101,8 @@ void WidgetPopupMenu::showMenu()
     int targetWidth = mTargetWidgetPtr->width();
     int targetHeight = mTargetWidgetPtr->height();
 
-    int realX = topLevelWidget()->mapFromGlobal(QPoint(targetX, targetY)).x();
-    int realY = topLevelWidget()->mapFromGlobal(QPoint(targetX, targetY)).y();
+    int realX = nativeParentWidget()->mapFromGlobal(QPoint(targetX, targetY)).x();
+    int realY = nativeParentWidget()->mapFromGlobal(QPoint(targetX, targetY)).y();
 
     if (mMenuPosition == P_Top_Center)
     {
@@ -116,7 +116,7 @@ void WidgetPopupMenu::showMenu()
     // 全局统计
     mGlobalMenuCount++;
 
-    setParent(topLevelWidget());
+    setParent(nativeParentWidget());
     setVisible(true);
     setFocus();
 }

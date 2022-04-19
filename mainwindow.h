@@ -45,6 +45,8 @@ private slots:
     void slot_btnClose_clicked();
     void slot_open_file();
 
+    void slot_custom_context_menu_requested(const QPoint &pos);
+
 private:
     Ui::MainWindow *ui;
 

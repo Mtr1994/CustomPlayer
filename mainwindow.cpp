@@ -3,6 +3,7 @@
 
 #include <QScreen>
 #include <QFileDialog>
+#include <QMenu>
 
 //test
 #include <QDebug>
@@ -14,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     init();
 
-    setWindowTitle("中国科学院深海科学与工程研究所-潜器视频播放系统");
+    setWindowTitle("木头人播放系统");
     setWindowFlags(Qt::CustomizeWindowHint);
 }
 
@@ -61,8 +62,8 @@ void MainWindow::init()
     connect(ui->widgetMediaControl, &WidgetMediaControl::sgl_trigger_action_next_frame, this, &MainWindow::slot_trigger_action_next_frame);
     connect(ui->widgetMediaControl, &WidgetMediaControl::sgl_trigger_action_speed_change, this, &MainWindow::slot_trigger_action_speed_change);
 
-    // 默认打开视频文件
-    ui->widgetPlayer->play("./Videos/trailer.mp4");
+    // 自定义菜单
+    connect(ui->widgetBase, &QWidget::customContextMenuRequested, this, &MainWindow::slot_custom_context_menu_requested);
 }
 
 void MainWindow::slot_media_pause()
@@ -122,7 +123,7 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
     if (event->pos().x() > ui->widgetTitle->width() || event->pos().y() > ui->widgetTitle->height()) return;
     if (event->button() == Qt::LeftButton)
     {
-        mLastMousePosition = event->globalPos();
+        mLastMousePosition = event->globalPosition();
         mMousePressed = true;
     }
 }
@@ -137,9 +138,9 @@ void MainWindow::mouseMoveEvent(QMouseEvent *event)
 {
     if (!mMousePressed) return;
     if (!event->buttons().testFlag(Qt::LeftButton)) return;
-    const QPointF position = pos() + event->globalPos() - mLastMousePosition; //the position of mainfrmae + (current_mouse_position - last_mouse_position)
+    const QPointF position = pos() + event->globalPosition() - mLastMousePosition; //the position of mainfrmae + (current_mouse_position - last_mouse_position)
     move(position.x(), position.y());
-    mLastMousePosition = event->globalPos();
+    mLastMousePosition = event->globalPosition();
 }
 
 void MainWindow::slot_btnClose_clicked()
@@ -152,11 +153,26 @@ void MainWindow::slot_open_file()
     QStringList fileName = QFileDialog::getOpenFileNames(nullptr, tr("选择视频文件"), "", tr("视频文件 (*.mp4 *.mkv *.avi *.mov *.flv *.wmv *.mpg)"));
     if (fileName.isEmpty()) return;
 
-    ui->widgetPlayer->play(fileName.at(0));
+
 
     if (fileName.size() == 0) return;
 
-    ui->widgetPlayer->setVolume(float(0.32));
-
-    resizeEvent(nullptr);
+    ui->widgetPlayer->setVolume(0.36);
+    ui->widgetPlayer->play(fileName.at(0));
 }
+
+void MainWindow::slot_custom_context_menu_requested(const QPoint &pos)
+{
+    Q_UNUSED(pos);
+    QMenu menu(this);
+    QAction actionOpen("打开文件");
+    connect(&actionOpen, &QAction::triggered, this, &MainWindow::slot_open_file);
+    menu.addAction(&actionOpen);
+
+    QAction actionClose("关闭程序");
+    connect(&actionClose, &QAction::triggered, this, []{ exit(0); });
+    menu.addAction(&actionClose);
+
+    menu.exec(QCursor::pos());
+}
+

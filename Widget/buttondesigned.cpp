@@ -68,7 +68,7 @@ void ButtonDesigned::paintEvent(QPaintEvent *e)
     e->accept();
 }
 
-void ButtonDesigned::enterEvent(QEvent *e)
+void ButtonDesigned::enterEvent(QEnterEvent *e)
 {
     e->accept();
     mMouseHovered = true;

@@ -17,7 +17,7 @@ public:
 
 protected:
     void paintEvent(QPaintEvent *e) override;
-    void enterEvent(QEvent * e) override;
+    void enterEvent(QEnterEvent * e) override;
     void leaveEvent(QEvent* e) override;
 
 private:
