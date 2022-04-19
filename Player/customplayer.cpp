@@ -58,7 +58,10 @@ void CustomPlayer::pause()
 
 void CustomPlayer::stop()
 {
+    if (nullptr == mMediaPlayer) return;
+    if (mMediaPlayer->mediaStatus() == QMediaPlayer::NoMedia) return;
 
+    mMediaPlayer->stop();
 }
 
 void CustomPlayer::seek(int64_t seconds)

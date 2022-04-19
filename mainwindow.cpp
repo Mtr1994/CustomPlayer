@@ -150,14 +150,17 @@ void MainWindow::slot_btnClose_clicked()
 
 void MainWindow::slot_open_file()
 {
+    // 暂停播放
+    ui->widgetPlayer->pause();
+
     QStringList fileName = QFileDialog::getOpenFileNames(nullptr, tr("选择视频文件"), "", tr("视频文件 (*.mp4 *.mkv *.avi *.mov *.flv *.wmv *.mpg)"));
     if (fileName.isEmpty()) return;
 
+    if (fileName.size() == 0)  return;
 
+    // 停止前面的视频
+    ui->widgetPlayer->stop();
 
-    if (fileName.size() == 0) return;
-
-    ui->widgetPlayer->setVolume(0.36);
     ui->widgetPlayer->play(fileName.at(0));
 }
 
